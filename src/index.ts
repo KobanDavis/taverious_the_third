@@ -40,10 +40,13 @@ client.on(Events.VoiceStateUpdate, async (prevState, nextState) => {
 		const songPath = path.resolve(uploadsFolderPath, file)
 		const resource = createAudioResource(songPath, { inlineVolume: true })
 
-		player.on(AudioPlayerStatus.Idle, () => connection.destroy())
+		player.on(AudioPlayerStatus.Idle, () => connection?.destroy())
 		resource.volume!.setVolume(0.1)
 		connection.subscribe(player)
 		player.play(resource)
+		setTimeout(() => {
+			player.stop()
+		}, 10000)
 		prevUID = nextState.id
 	}
 })
@@ -71,3 +74,5 @@ client.on(Events.InteractionCreate, async (interaction) => {
 })
 
 client.login(process.env.BOT_TOKEN)
+
+export default client
