@@ -9,7 +9,7 @@ const data = new SlashCommandBuilder()
 	.setDescription('Upload an audio file to play when you join a voice channel.')
 	.addAttachmentOption((option) => option.setRequired(true).setName('audio').setDescription('The audio file to play.'))
 
-const validExtensions = ['.mp3', '.flac', '.opus', '.ogg', '.wav', '.aac']
+const validExtensions = ['.mp3', '.mp4', '.flac', '.opus', '.ogg', '.wav', '.aac']
 
 const execute = async (interaction: ChatInputCommandInteraction) => {
 	await interaction.deferReply()
@@ -22,12 +22,19 @@ const execute = async (interaction: ChatInputCommandInteraction) => {
 		)
 	}
 
-	if (attachment.size > 1024 ** 2) {
-		return interaction.editReply('File size too large. Ensure file is 1MB or below.')
+	if (attachment.size > 1024 ** 2 * 10) {
+		return interaction.editReply('File size too large. Ensure file is 10MB or below.')
 	}
 
-	const soundPath = path.resolve(process.cwd(), './src/assets/uploads/', interaction.user.id + extension)
-	const stream = fs.createWriteStream(soundPath)
+	const uploadsFolderPath = path.resolve(process.cwd(), './src/assets/uploads/')
+
+	const prevFile = fs.readdirSync(uploadsFolderPath).find((file) => file.startsWith(interaction.user.id))
+	if (prevFile) {
+		fs.unlinkSync(path.join(uploadsFolderPath, prevFile))
+		console.log(uploadsFolderPath + prevFile)
+	}
+
+	const stream = fs.createWriteStream(path.join(uploadsFolderPath, interaction.user.id + extension))
 	const { body } = await fetch(attachment.url)
 	if (body === null) return
 
