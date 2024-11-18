@@ -3,7 +3,7 @@ import path from 'path'
 import fs from 'fs/promises'
 
 import { Client, Events, GatewayIntentBits } from 'discord.js'
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, getVoiceConnection } from '@discordjs/voice'
+import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, getVoiceConnection, VoiceConnectionStatus } from '@discordjs/voice'
 import commands, { initCommands } from './commands'
 
 dotenv.config()
@@ -34,6 +34,10 @@ client.on(Events.VoiceStateUpdate, async (prevState, nextState) => {
 			channelId: nextState.channelId,
 			guildId: nextState.guild.id,
 		})
+
+		if (connection.state.status === VoiceConnectionStatus.Ready) {
+			return
+		}
 
 		const player = createAudioPlayer()
 
